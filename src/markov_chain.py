@@ -1,9 +1,17 @@
 
 
-class Chain:
+class MarkovChain:
     """ A Markov chain, consisting of nodes and edges. """
     nodes = []
     edges = []
+
+    def add_node(self, label=None):
+        n = len(self.nodes)
+        self.nodes.append(Node(n, label))
+
+    def __str__(self):
+        return "A Markov chain with {0} nodes".format(len(self.nodes))
+
 
 
 class Node:
@@ -23,3 +31,10 @@ class Edge:
         self.node1 = node1
         self.node2 = node2
         self.probability = probability
+
+
+if __name__ == "__main__":
+    chain = MarkovChain()
+    chain.add_node()
+    chain.add_node()
+    print(chain)
