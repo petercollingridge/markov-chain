@@ -9,9 +9,21 @@ class MarkovChain:
         n = len(self.nodes)
         self.nodes.append(Node(n, label))
 
-    def __str__(self):
-        return "A Markov chain with {0} nodes".format(len(self.nodes))
+    def add_edge(self, index1, index2, probability=1):
+        # TODO test index exists
+        node1 = self.nodes[index1]
+        node2 = self.nodes[index2]
 
+        edge = Edge(node1, node2, probability)
+        self.edges.append(edge)
+        node1.edges_out.append(edge)
+        node2.edges_in.append(edge)
+
+    def __str__(self):
+        return "A Markov chain with {0} nodes and {1} edges".format(
+            len(self.nodes),
+            len(self.edges),
+        )
 
 
 class Node:
@@ -37,4 +49,5 @@ if __name__ == "__main__":
     chain = MarkovChain()
     chain.add_node()
     chain.add_node()
+    chain.add_edge(0, 1)
     print(chain)
