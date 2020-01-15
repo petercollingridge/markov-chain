@@ -1,4 +1,4 @@
-
+import numpy
 
 class MarkovChain:
     """ A Markov chain, consisting of nodes and edges. """
