@@ -3,12 +3,19 @@
 class MarkovChain:
     """ A Markov chain, consisting of nodes and edges. """
 
-    def __init__(self, n=0, edges=None):
+    def __init__(self, params=None):
         self.nodes = []
         self.edges = []
-        self.add_nodes(n)
-        if edges:
-            self.add_edges(edges)
+
+        if params:
+            if type(params) == int:
+                # params is a number of nodes
+                self.add_nodes(params)
+            else:
+                # params is a list of edges
+                nodes = max(max(edge) for edge in params) + 1
+                self.add_nodes(nodes)
+                self.add_edges(params)
 
     def add_node(self, label=None):
         n = len(self.nodes)
@@ -91,12 +98,5 @@ class Edge:
 
 
 if __name__ == "__main__":
-    chain = MarkovChain()
-    chain.add_node()
-    chain.add_node()
-    chain.add_edge(0, 1)
+    chain = MarkovChain([(0, 1), (3, 2), (1, 2), (2, 3), (0, 2)])
     print(chain)
-
-    chain2 = MarkovChain()
-    chain2.add_nodes(5)
-    print(chain2)
