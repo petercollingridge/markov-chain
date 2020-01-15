@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 
 class MarkovChain:
     """ A Markov chain, consisting of nodes and edges. """
@@ -65,6 +65,20 @@ class MarkovChain:
     def is_absorbing(self):
         return any(len(node.edges_out) == 0 for node in self.nodes)
 
+    def get_transition_matrix(self):
+        n = len(self.nodes)
+        if n == 0:
+            return []
+        
+        matrix = np.zeros((n, n))
+
+        for edge in self.edges:
+            i = edge.from_node.index
+            j = edge.to_node.index
+            matrix[i, j] = edge.probability
+
+        return matrix
+
     def __str__(self):
         return "A Markov chain with {0} nodes and {1} edges".format(
             len(self.nodes),
@@ -94,9 +108,23 @@ class Edge:
         self.probability = probability
 
     def __str__(self):
-        return "Edge from {0} to {1}".format(self.from_node.index, self.to_node.index)
+        return "Edge from {0} to {1}, p = {2}".format(
+            self.from_node.index,
+            self.to_node.index,
+            self.probability
+        )
 
 
 if __name__ == "__main__":
-    chain = MarkovChain([(0, 1), (3, 2), (1, 2), (2, 3), (0, 2)])
-    print(chain)
+    chain = MarkovChain([
+        (0, 1, 0.02),
+        (1, 0, 0.3),
+        (1, 2, 0.2),
+        (2, 1, 0.4),
+        (2, 0, 0.02),
+        (0, 2, 0.005),
+    ])
+
+    for edge in chain.edges:
+        print(edge)
+    print(chain.get_transition_matrix())
