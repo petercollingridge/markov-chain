@@ -3,9 +3,12 @@
 class MarkovChain:
     """ A Markov chain, consisting of nodes and edges. """
 
-    def __init__(self):
+    def __init__(self, n=0, edges=None):
         self.nodes = []
         self.edges = []
+        self.add_nodes(n)
+        if edges:
+            self.add_edges(edges)
 
     def add_node(self, label=None):
         n = len(self.nodes)
@@ -24,6 +27,10 @@ class MarkovChain:
         self.edges.append(edge)
         node1.edges_out.append(edge)
         node2.edges_in.append(edge)
+
+    def add_edges(self, edges):
+        for edge in edges:
+            self.add_edge(*edge)
 
     def is_connected(self):
         if len(self.nodes) == 0:
