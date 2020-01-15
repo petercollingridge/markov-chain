@@ -53,47 +53,35 @@ class TestMarkovChain(unittest.TestCase):
 
 class TestMarkovChainConnection(unittest.TestCase):
     def test_two_circles(self):
-        chain = MarkovChain()
-        chain.add_nodes(7)
-        chain.add_edge(0, 1)
-        chain.add_edge(1, 2)
-        chain.add_edge(2, 3)
-        chain.add_edge(3, 0)
-        
-        chain.add_edge(4, 5)
-        chain.add_edge(5, 6)
-        chain.add_edge(6, 4)
+        chain = MarkovChain(7, ((0, 1), (1, 2), (2, 3), (3, 0), (4, 5), (5, 6), (6, 4)))
         self.assertEqual(chain.is_connected(), False)
 
     def test_two_connected_circles(self):
-        chain = MarkovChain()
-        chain.add_nodes(7)
-        chain.add_edge(0, 1)
-        chain.add_edge(1, 2)
-        chain.add_edge(2, 3)
-        chain.add_edge(3, 0)
-        
-        chain.add_edge(4, 5)
-        chain.add_edge(5, 6)
-        chain.add_edge(6, 4)
-        chain.add_edge(4, 0)
+        chain = MarkovChain(7, ((0, 1), (1, 2), (2, 3), (3, 0), (4, 5), (5, 6), (6, 4), (4, 0)))
         self.assertEqual(chain.is_connected(), True)
 
     def test_all_nodes_out(self):
-        chain = MarkovChain()
-        chain.add_nodes(4)
-        chain.add_edge(0, 1)
-        chain.add_edge(0, 2)
-        chain.add_edge(0, 3)
-
+        chain = MarkovChain(4, ((0, 1), (0, 2), (0, 3)))
         self.assertEqual(chain.is_connected(), True)
 
     def test_all_nodes_in(self):
-        chain = MarkovChain()
-        chain.add_nodes(4)
-        chain.add_edge(1, 0)
-        chain.add_edge(2, 0)
-        chain.add_edge(3, 0)
-
+        chain = MarkovChain(4, ((1, 0), (2, 0), (3, 0)))
         self.assertEqual(chain.is_connected(), True)
 
+
+class TestMarkovChainAbsorption(unittest.TestCase):
+    def test_circular_chain(self):
+        chain = MarkovChain(4, ((0, 1), (1, 2), (2, 3), (3, 0)))
+        self.assertEqual(chain.is_absorbing(), False)
+
+    def test_circular_chain_with_exit(self):
+        chain = MarkovChain(5, ((0, 1), (1, 2), (2, 3), (3, 0), (0, 4)))
+        self.assertEqual(chain.is_absorbing(), True)
+
+    def test_all_nodes_out(self):
+        chain = MarkovChain(4, ((0, 1), (0, 2), (0, 3)))
+        self.assertEqual(chain.is_absorbing(), True)
+
+    def test_all_nodes_in(self):
+        chain = MarkovChain(4, ((1, 0), (2, 0), (3, 0)))
+        self.assertEqual(chain.is_absorbing(), True)

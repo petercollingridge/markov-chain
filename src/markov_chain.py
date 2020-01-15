@@ -55,6 +55,9 @@ class MarkovChain:
 
         return len(visited) == len(self.nodes)
 
+    def is_absorbing(self):
+        return any(len(node.edges_out) == 0 for node in self.nodes)
+
     def __str__(self):
         return "A Markov chain with {0} nodes and {1} edges".format(
             len(self.nodes),
