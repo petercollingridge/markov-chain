@@ -2,12 +2,18 @@
 
 class MarkovChain:
     """ A Markov chain, consisting of nodes and edges. """
-    nodes = []
-    edges = []
+
+    def __init__(self):
+        self.nodes = []
+        self.edges = []
 
     def add_node(self, label=None):
         n = len(self.nodes)
         self.nodes.append(Node(n, label))
+
+    def add_nodes(self, n):
+        for _ in range(n):
+            self.add_node()
 
     def add_edge(self, index1, index2, probability=1):
         # TODO test index exists
@@ -51,3 +57,7 @@ if __name__ == "__main__":
     chain.add_node()
     chain.add_edge(0, 1)
     print(chain)
+
+    chain2 = MarkovChain()
+    chain2.add_nodes(5)
+    print(chain2)
