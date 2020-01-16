@@ -1,3 +1,4 @@
+from collections import defaultdict
 
 
 class MarkovChain:
@@ -16,6 +17,12 @@ class MarkovChain:
                 nodes = max(max(edge) for edge in params) + 1
                 self.add_nodes(nodes)
                 self.add_edges(params)
+
+    def __str__(self):
+        return "A Markov chain with {0} nodes and {1} edges".format(
+            len(self.nodes),
+            len(self.edges),
+        )
 
     def add_node(self, label=None):
         n = len(self.nodes)
@@ -40,6 +47,8 @@ class MarkovChain:
             self.add_edge(*edge)
 
     def is_connected(self):
+        """ Return true if all the nodes are connected to each other. """
+
         if len(self.nodes) == 0:
             return True
 
@@ -63,13 +72,16 @@ class MarkovChain:
         return len(visited) == len(self.nodes)
 
     def is_absorbing(self):
+        """ Return true if any nodes have no outgoing edges. """
         return any(len(node.edges_out) == 0 for node in self.nodes)
 
-    def __str__(self):
-        return "A Markov chain with {0} nodes and {1} edges".format(
-            len(self.nodes),
-            len(self.edges),
-        )
+    def get_node_depths(self):
+        if not self.is_absorbing():
+            return False
+
+        depths = defaultdict(int)
+
+        return depths
 
 
 class Node:
@@ -98,5 +110,5 @@ class Edge:
 
 
 if __name__ == "__main__":
-    chain = MarkovChain([(0, 1), (3, 2), (1, 2), (2, 3), (0, 2)])
+    chain = MarkovChain([(0, 1), (1, 2), (2, 3), (3, 4), (0, 5), (5, 3)])
     print(chain)
