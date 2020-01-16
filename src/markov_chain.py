@@ -74,7 +74,7 @@ class MarkovChain:
 
     def is_absorbing(self):
         """ Return true if any nodes have no outgoing edges. """
-        return any(len(node.edges_out) == 0 for node in self.nodes)
+        return any(node.is_absorbing() for node in self.nodes)
 
     def get_transition_matrix(self):
         n = len(self.nodes)
@@ -89,6 +89,28 @@ class MarkovChain:
             matrix[i, j] = edge.probability
 
         return matrix
+
+    def get_expected_steps(self):
+        if not self.is_absorbing():
+            return -1
+        
+        # Get matrix of just transisition states
+        transition_states = [node for node in self.nodes if not node.is_absorbing()]
+        
+        # Map index in the original matrix to index in the transition state matrix
+        map_indices = {node.index: i for (i, node) in enumerate(transition_states)}
+
+        t = len(transition_states)
+        Q = np.zeros((t, t))
+
+        for edge in self.edges:
+            i = map_indices.get(edge.from_node.index, -1)
+            j = map_indices.get(edge.to_node.index, -1)
+            if i != -1 and j != -1:
+                Q[i, j] = edge.probability
+
+        N = np.linalg.inv(np.identity(t) - Q)
+        return N
 
     def get_node_depths(self):
         if not self.is_absorbing():
@@ -108,8 +130,11 @@ class Node:
         self.edges_in = []
         self.edges_out = []
 
-    def __str__(self):
-        return "State {0}".format(self.index)
+    def is_absorbing(self):
+        return len(self.edges_out) == 0
+
+    def __repr__(self):
+        return "<Node object {0}>".format(self.index)
 
 
 class Edge:
@@ -138,6 +163,14 @@ if __name__ == "__main__":
         (0, 2, 0.005),
     ])
 
-    for edge in chain.edges:
-        print(edge)
     print(chain.get_transition_matrix())
+
+    chain = MarkovChain([
+        (0, 1, 1 / 3),
+        (1, 0, 4 / 5),
+        (1, 2, 1 / 5),
+        (0, 3, 2 / 3),
+        (3, 0, 2 / 5),
+        (3, 4, 3 / 5),
+    ])
+    print(chain.get_expected_steps())
