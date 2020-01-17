@@ -2,6 +2,7 @@ import numpy as np
 from collections import defaultdict
 
 from errors import MarkovChainPropertyError
+from utils import write_matrix_with_fractions
 
 
 class MarkovChain:
@@ -195,3 +196,4 @@ if __name__ == "__main__":
         (3, 4, 3 / 5),
     ])
     print(chain.get_expected_steps())
+    write_matrix_with_fractions(chain.get_expected_steps())
