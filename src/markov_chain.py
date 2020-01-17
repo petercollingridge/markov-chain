@@ -1,9 +1,11 @@
 import numpy as np
 from collections import defaultdict
 
+from errors import MarkovChainPropertyError
+
 
 class MarkovChain:
-    """ A Markov chain, consisting of nodes and edges. """
+    """A Markov chain, consisting of nodes and edges."""
 
     def __init__(self, params=None):
         self.nodes = []
@@ -92,7 +94,7 @@ class MarkovChain:
 
     def get_expected_steps(self):
         if not self.is_absorbing():
-            return -1
+            raise MarkovChainPropertyError('Chain is not absorbing')
         
         # Get matrix of just transisition states
         transition_states = [node for node in self.nodes if not node.is_absorbing()]
@@ -122,7 +124,7 @@ class MarkovChain:
 
 
 class Node:
-    """ A node in a Markov chain. """
+    """A node in a Markov chain."""
 
     def __init__(self, index, label=None):
         self.index = index
@@ -133,12 +135,26 @@ class Node:
     def is_absorbing(self):
         return len(self.edges_out) == 0
 
+    def probabilities_sum_to_one(self):
+        """ Return True if all the outgoing edge probabilities sum to 1 (or sufficiently close). """
+        return abs(sum(edge.probability for edge in self.edges_out) - 1) < 1e-8
+
+    def normalise_probabilities(self):
+        n = len(self.edges_out)
+        if n == 0:
+            return
+        
+        total = sum(edge.probability for edge in self.edges_out)
+        if total != 0:
+            for edge in self.edges_out:
+                edge.probability /= total
+
     def __repr__(self):
         return "<Node object {0}>".format(self.index)
 
 
 class Edge:
-    """ An edge representing the transition between two states in a Markov chain. """
+    """An edge representing the transition between two states in a Markov chain."""
 
     def __init__(self, from_node, to_node, probability):
         self.from_node = from_node
@@ -164,6 +180,11 @@ if __name__ == "__main__":
     ])
 
     print(chain.get_transition_matrix())
+
+    try:
+        print(chain.get_expected_steps())
+    except MarkovChainPropertyError as err:
+        print(err) 
 
     chain = MarkovChain([
         (0, 1, 1 / 3),
