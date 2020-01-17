@@ -118,6 +118,11 @@ class MarkovChain:
         N = np.linalg.inv(np.identity(t) - Q)
         return N
 
+    def get_expected_steps_before_absorption(self):
+        N = self.get_expected_steps()
+        size = N.shape[0]
+        return N.dot(np.ones((size, 1)))
+
     def get_node_depths(self):
         if not self.is_absorbing():
             return False
@@ -198,5 +203,20 @@ if __name__ == "__main__":
         (3, 0, 2 / 5),
         (3, 4, 3 / 5),
     ])
+
+    chain = MarkovChain([
+        (0, 1, 1 / 3),
+        (1, 0, 4 / 5),
+        (1, 2, 1 / 5),
+        (0, 3, 2 / 3),
+        (3, 0, 2 / 5),
+        (3, 4, 3 / 5),
+        (2, 5, 1),
+        (4, 5, 1 / 3),
+        (4, 4, 2 / 3),
+    ])
+
     print(chain.get_expected_steps())
     write_matrix_with_fractions(chain.get_expected_steps())
+
+    write_matrix_with_fractions(chain.get_expected_steps_before_absorption())
