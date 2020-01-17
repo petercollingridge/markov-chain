@@ -96,6 +96,9 @@ class MarkovChain:
     def get_expected_steps(self):
         if not self.is_absorbing():
             raise MarkovChainPropertyError('Chain is not absorbing')
+
+        if not self.is_connected():
+            raise MarkovChainPropertyError('Chain is disjoint')
         
         # Get matrix of just transisition states
         transition_states = [node for node in self.nodes if not node.is_absorbing()]
