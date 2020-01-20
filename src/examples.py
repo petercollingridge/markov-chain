@@ -41,6 +41,8 @@ if __name__ == "__main__":
         (4, 4, 2 / 3),
     ])
 
+    print(chain.get_node_depths())
+
     print(chain.get_expected_steps())
     write_matrix_with_fractions(chain.get_expected_steps())
 

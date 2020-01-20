@@ -124,9 +124,39 @@ class MarkovChain:
 
     def get_node_depths(self):
         if not self.is_absorbing():
-            return False
+            raise MarkovChainPropertyError('Chain is not absorbing')
 
-        depths = defaultdict(int)
+        if not self.is_connected():
+            raise MarkovChainPropertyError('Chain is disjoint')
+
+        depths = dict()
+
+        def is_open_node(node):
+            return node.index not in depths.keys()
+
+        while len(depths) < len(self.nodes):
+            # Find any node which has no incoming edges from nodes not already dealt with
+            for node in self.nodes:
+                if is_open_node(node):
+                    edges = [edge for edge in node.edges_in if is_open_node(edge.from_node) and not edge.is_loop]
+                    if len(edges) == 0:
+                        current_node = node
+                        edges = [edge for edge in node.edges_in if not edge.is_loop]
+                        if len(edges) == 0:
+                            depth = 0
+                        else:
+                            depth = max(depths.get(edge.from_node.index, 0) for edge in edges) + 1
+                        break
+            else:
+                # If we don't have a node then pick the one with the smallest index
+                node_index = min(node.index for node in self.nodes if is_open_node(node))
+                current_node = self.nodes[node_index]
+                if len(depths) == 0:
+                    depth = 0
+                else:
+                    depth = max(depths.values()) + 1
+
+            depths[current_node.index] = depth
 
         return depths
 
@@ -168,8 +198,9 @@ class Edge:
         self.from_node = from_node
         self.to_node = to_node
         self.probability = probability
+        self.is_loop = from_node == to_node
 
-    def __str__(self):
+    def __repr__(self):
         return "Edge from {0} to {1}, p = {2}".format(
             self.from_node.index,
             self.to_node.index,
