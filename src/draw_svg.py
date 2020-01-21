@@ -6,16 +6,14 @@ class SVGElement:
 
     def __init__(self, type, attributes=None, child=None):
         self.type = type
+        self.attributes = {}
+        self.children = []
 
         if attributes:
             self.attributes = attributes
-        else:
-            self.attributes = {}
 
         if child is not None:
-            self.children = [str(child)]
-        else:
-            self.children = []
+            self.children = [child]
 
     def add(self, tag, attributes=None, child=None):
         """
