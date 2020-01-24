@@ -129,15 +129,18 @@ class MarkovChain:
         if not self.is_connected():
             raise MarkovChainPropertyError('Chain is disjoint')
 
-        depths = dict()
+
+        # Map node index to the depth of that node
+        depth_of_nodes = dict()
 
         def is_open_node(node):
-            return node.index not in depths.keys()
+            return node.index not in depth_of_nodes.keys()
 
-        while len(depths) < len(self.nodes):
+        while len(depth_of_nodes) < len(self.nodes):
             # Find any node which has no incoming edges from nodes not already dealt with
             for node in self.nodes:
                 if is_open_node(node):
+                    # Get list of edges incoming edges from nodes not yet dealt with
                     edges = [edge for edge in node.edges_in if is_open_node(edge.from_node) and not edge.is_loop]
                     if len(edges) == 0:
                         current_node = node
@@ -145,20 +148,44 @@ class MarkovChain:
                         if len(edges) == 0:
                             depth = 0
                         else:
-                            depth = max(depths.get(edge.from_node.index, 0) for edge in edges) + 1
+                            depth = max(depth_of_nodes.get(edge.from_node.index, 0) for edge in edges) + 1
                         break
             else:
                 # If we don't have a node then pick the one with the smallest index
                 node_index = min(node.index for node in self.nodes if is_open_node(node))
                 current_node = self.nodes[node_index]
-                if len(depths) == 0:
+                if len(depth_of_nodes) == 0:
                     depth = 0
                 else:
-                    depth = max(depths.values()) + 1
+                    depth = max(depth_of_nodes.values()) + 1
 
-            depths[current_node.index] = depth
+            depth_of_nodes[current_node.index] = depth
+
+        # Get a list, where the item at depth[i] is a list of nodes with a depth of i
+        max_depth = max(depth_of_nodes.values())
+        depths = []
+        for i in range(max_depth + 1):
+            depths.append([self.nodes[index] for index, depth in depth_of_nodes.items() if depth == i])
 
         return depths
+
+    def get_node_descendants(self, depths):
+        node_descendants = dict()
+
+        for nodes in depths[::-1]:
+            for node in nodes:
+                # Only get children with a depth greater than node's depth
+                children = node.get_children()
+                descendants = set(child.index for child in children)
+
+                for child in children:
+                    child_descendants = node_descendants.get(child.index)
+                    if child_descendants:
+                        descendants.update(child_descendants)
+
+                node_descendants[node.index] = descendants
+
+        return node_descendants
 
 
 class Node:
@@ -186,6 +213,9 @@ class Node:
         if total != 0:
             for edge in self.edges_out:
                 edge.probability /= total
+
+    def get_children(self):
+        return [edge.to_node for edge in self.edges_out if not edge.is_loop]
 
     def __repr__(self):
         return "<Node object {0}>".format(self.index)

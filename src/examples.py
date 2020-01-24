@@ -13,12 +13,12 @@ if __name__ == "__main__":
         (0, 2, 0.005),
     ])
 
-    print(chain.get_transition_matrix())
+    # print(chain.get_transition_matrix())
 
-    try:
-        print(chain.get_expected_steps())
-    except MarkovChainPropertyError as err:
-        print(err) 
+    # try:
+    #     print(chain.get_expected_steps())
+    # except MarkovChainPropertyError as err:
+    #     print(err) 
 
     chain = MarkovChain([
         (0, 1, 1 / 3),
@@ -41,9 +41,11 @@ if __name__ == "__main__":
         (4, 4, 2 / 3),
     ])
 
-    print(chain.get_node_depths())
+    depths = chain.get_node_depths()
+    children = chain.get_node_descendants(depths)
+    print(children)
 
-    print(chain.get_expected_steps())
-    write_matrix_with_fractions(chain.get_expected_steps())
+    # print(chain.get_expected_steps())
+    # write_matrix_with_fractions(chain.get_expected_steps())
 
-    write_matrix_with_fractions(chain.get_expected_steps_before_absorption())
+    # write_matrix_with_fractions(chain.get_expected_steps_before_absorption())
