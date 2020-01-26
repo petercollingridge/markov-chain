@@ -122,60 +122,70 @@ class MarkovChain:
         size = N.shape[0]
         return N.dot(np.ones((size, 1)))
 
-    def get_node_depths(self):
+    def set_node_depths(self):
         if not self.is_absorbing():
             raise MarkovChainPropertyError('Chain is not absorbing')
 
         if not self.is_connected():
             raise MarkovChainPropertyError('Chain is disjoint')
 
+        # Set all depths to 0 to start with
+        for node in self.nodes:
+            node.depth = 0
 
         # Map node index to the depth of that node
-        depth_of_nodes = dict()
+        visited = set()
 
         def is_open_node(node):
-            return node.index not in depth_of_nodes.keys()
+            return node not in visited
 
-        while len(depth_of_nodes) < len(self.nodes):
+        while len(visited) < len(self.nodes):
             # Find any node which has no incoming edges from nodes not already dealt with
             for node in self.nodes:
                 if is_open_node(node):
                     # Get list of edges incoming edges from nodes not yet dealt with
                     edges = [edge for edge in node.edges_in if is_open_node(edge.from_node) and not edge.is_loop]
+                    # If there are no edges, then select this node
                     if len(edges) == 0:
-                        current_node = node
+                        selected_node = node
                         edges = [edge for edge in node.edges_in if not edge.is_loop]
                         if len(edges) == 0:
+                            # Depth is 0 if there are no incoming edges
                             depth = 0
                         else:
-                            depth = max(depth_of_nodes.get(edge.from_node.index, 0) for edge in edges) + 1
+                            # Otherwise depth is one more than the maximum incoming edge
+                            depth = max(edge.from_node.depth for edge in edges) + 1
                         break
             else:
-                # If we don't have a node then pick the one with the smallest index
+                # If we can't find a node so pick the one with the smallest index
                 node_index = min(node.index for node in self.nodes if is_open_node(node))
-                current_node = self.nodes[node_index]
-                if len(depth_of_nodes) == 0:
+                selected_node = self.nodes[node_index]
+                if len(visited) == 0:
                     depth = 0
                 else:
-                    depth = max(depth_of_nodes.values()) + 1
+                    depth = max(node.depth for node in visited) + 1
 
-            depth_of_nodes[current_node.index] = depth
+            # Set depth of current node
+            selected_node.depth = depth
+            visited.add(selected_node)
 
+    def _get_nodes_at_depth(self):
         # Get a list, where the item at depth[i] is a list of nodes with a depth of i
-        max_depth = max(depth_of_nodes.values())
+        max_depth = max(node.depth for node in self.nodes)
         depths = []
         for i in range(max_depth + 1):
-            depths.append([self.nodes[index] for index, depth in depth_of_nodes.items() if depth == i])
+            depths.append([node for node in self.nodes if node.depth == i])
 
         return depths
 
-    def get_node_descendants(self, depths):
+    def get_node_descendants(self):
+        depths = self._get_nodes_at_depth()
         node_descendants = dict()
 
         for nodes in depths[::-1]:
             for node in nodes:
                 # Only get children with a depth greater than node's depth
-                children = node.get_children()
+                children = [child for child in node.get_children() if child.depth > node.depth]
                 descendants = set(child.index for child in children)
 
                 for child in children:
@@ -196,6 +206,7 @@ class Node:
         self.label = label
         self.edges_in = []
         self.edges_out = []
+        self.depth = 0
 
     def is_absorbing(self):
         return len(self.edges_out) == 0

@@ -41,8 +41,10 @@ if __name__ == "__main__":
         (4, 4, 2 / 3),
     ])
 
-    depths = chain.get_node_depths()
-    children = chain.get_node_descendants(depths)
+    chain.set_node_depths()
+    for node in chain.nodes:
+        print(node, node.depth)
+    children = chain.get_node_descendants()
     print(children)
 
     # print(chain.get_expected_steps())
