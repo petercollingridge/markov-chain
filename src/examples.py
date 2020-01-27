@@ -47,6 +47,8 @@ if __name__ == "__main__":
     children = chain.get_node_descendants()
     print(children)
 
+    chain.get_node_positions()
+
     # print(chain.get_expected_steps())
     # write_matrix_with_fractions(chain.get_expected_steps())
 

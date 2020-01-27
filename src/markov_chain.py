@@ -197,6 +197,24 @@ class MarkovChain:
 
         return node_descendants
 
+    def get_node_positions(self):
+        self.set_node_depths()
+        descendants = self.get_node_descendants()
+        depths = self._get_nodes_at_depth()
+
+        # Map node index to a coordinate in (0, 1)
+        positions = [None] * len(self.nodes)
+
+        n_depths = len(depths)
+        if n_depths == 1:
+            dx = 0.5
+        else:
+            dx = 1 / ( - 1)
+
+        for nodes in depths:
+            for node in nodes:
+                positions[node.index] = dx * node.depth
+
 
 class Node:
     """A node in a Markov chain."""
