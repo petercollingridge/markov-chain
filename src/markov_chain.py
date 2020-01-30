@@ -199,22 +199,53 @@ class MarkovChain:
 
     def get_node_positions(self):
         self.set_node_depths()
-        descendants = self.get_node_descendants()
         depths = self._get_nodes_at_depth()
 
         # Map node index to a coordinate in (0, 1)
-        positions = [None] * len(self.nodes)
+        x_coords = [None] * len(self.nodes)
+        y_coords = [None] * len(self.nodes)
 
         n_depths = len(depths)
-        if n_depths == 1:
-            dx = 0.5
-        else:
-            dx = 1 / ( - 1)
+        dx = 0.5 if n_depths == 1 else 1 / (n_depths - 1)
 
         for nodes in depths:
             for node in nodes:
-                positions[node.index] = dx * node.depth
+                x_coords[node.index] = dx * node.depth
 
+        max_nodes_per_depth = max(len(nodes) for nodes in depths)
+        # Set y coordinate for nodes at depths with the most nodes
+        for nodes in depths:
+            if len(nodes) == max_nodes_per_depth:
+                dy = 0.5 if max_nodes_per_depth == 1 else 1 / (max_nodes_per_depth - 1)
+                for i, node in enumerate(nodes):
+                    y_coords[node.index] = dy * i
+
+        unset_nodes = set(node for node in self.nodes if y_coords[node.index] is None)
+
+        def all_coordinates_defined(nodes):
+            return nodes and all(y_coords[node.index] is not None for node in nodes)
+
+        def get_mean_coordinate(nodes):
+            return sum(y_coords[node.index] for node in nodes) / len(nodes)
+
+        while unset_nodes:
+            for node in unset_nodes:
+                children = node.get_children()
+                if all_coordinates_defined(children):
+                    y_coords[node.index] = get_mean_coordinate(children)
+                    continue
+
+                parents = node.get_parents()
+                if all_coordinates_defined(parents):
+                    y_coords[node.index] = get_mean_coordinate(parents)
+
+            unset_nodes = set(node for node in self.nodes if y_coords[node.index] is None)
+
+        positions = [(x, y) for (x, y) in zip(x_coords, y_coords)]
+        return {
+            'positions': positions,
+            'dimensions': (n_depths, max_nodes_per_depth)
+        }
 
 class Node:
     """A node in a Markov chain."""
@@ -245,6 +276,9 @@ class Node:
 
     def get_children(self):
         return [edge.to_node for edge in self.edges_out if not edge.is_loop]
+
+    def get_parents(self):
+        return [edge.from_node for edge in self.edges_in if not edge.is_loop]
 
     def __repr__(self):
         return "<Node object {0}>".format(self.index)

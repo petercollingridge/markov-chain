@@ -41,14 +41,8 @@ if __name__ == "__main__":
         (4, 4, 2 / 3),
     ])
 
-    chain.set_node_depths()
-    for node in chain.nodes:
-        print(node, node.depth)
-    children = chain.get_node_descendants()
-    print(children)
-
-    chain.get_node_positions()
-
+    nodes = chain.get_node_positions()
+    print(nodes)
     # print(chain.get_expected_steps())
     # write_matrix_with_fractions(chain.get_expected_steps())
 
