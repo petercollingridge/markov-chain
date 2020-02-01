@@ -43,16 +43,7 @@ if __name__ == "__main__":
     ])
 
     svg = get_chain_svg(chain)
-    svg.add_style('.node', {
-        'fill': '#c8c8c8'
-    })
-    
-    # svg.add_style('.node', {
-    #     'fill': 'none',
-    #     'stroke': '#222'
-    # })
     svg.write('test.svg')
-
 
     # print(chain.get_expected_steps())
     # write_matrix_with_fractions(chain.get_expected_steps())
