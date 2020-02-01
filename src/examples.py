@@ -1,6 +1,7 @@
 from markov_chain import MarkovChain
 from errors import MarkovChainPropertyError
 from utils import write_matrix_with_fractions
+from draw_svg import get_chain_svg
 
 
 if __name__ == "__main__":
@@ -41,8 +42,18 @@ if __name__ == "__main__":
         (4, 4, 2 / 3),
     ])
 
-    nodes = chain.get_node_positions()
-    print(nodes)
+    svg = get_chain_svg(chain)
+    svg.add_style('.node', {
+        'fill': '#c8c8c8'
+    })
+    
+    # svg.add_style('.node', {
+    #     'fill': 'none',
+    #     'stroke': '#222'
+    # })
+    svg.write('test.svg')
+
+
     # print(chain.get_expected_steps())
     # write_matrix_with_fractions(chain.get_expected_steps())
 

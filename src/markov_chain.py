@@ -247,6 +247,7 @@ class MarkovChain:
             'dimensions': (n_depths, max_nodes_per_depth)
         }
 
+
 class Node:
     """A node in a Markov chain."""
 
