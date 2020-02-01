@@ -1,66 +1,36 @@
-class SVGElement:
-    """ Generic element with attributes and potential child elements.
-        Outputs as <type attribute dict> child </type>."""
+from svg_element import SVG
 
-    indent = 4
 
-    def __init__(self, type, attributes=None, child=None):
-        self.type = type
-        self.attributes = {}
-        self.children = []
+def get_chain_svg(chain, **kwargs):
+    # Get config
+    border = kwargs.get('border', 10)
+    node_r = kwargs.get('node_r', 24)
+    dx = kwargs.get('dx', 100)
+    dy = kwargs.get('dy', 50)
 
-        if attributes:
-            self.attributes = attributes
+    full_border = border + node_r
 
-        if child is not None:
-            self.children = [child]
+    # Determine dimensions and viewBox
+    nodes = chain.get_node_positions()
+    dimensions = nodes['dimensions']
+    positions = nodes['positions']
 
-    def add(self, tag, attributes=None, child=None):
-        """
-            Create an element with given tag type and atrributes,
-            and append to self.children.
-            Returns the child element.
-        """
+    width = (dx + node_r * 2) * (dimensions[0] - 1)
+    height = (dy + node_r * 2) * (dimensions[1] - 1)
+    view_box = "-{0} -{0} {1} {2}".format(
+        full_border,
+        width + full_border * 2,
+        height + full_border * 2)
 
-        child = SVGElement(tag, attributes, child)
-        self.children.append(child)
-        return child
+    node_coords = [(x * width, y * height) for (x, y) in positions]
 
-    def add_rect(self, x=0, y=0, width=0, height=0, **kwargs):
-        kwargs['x'] = x
-        kwargs['y'] = y
-        kwargs['width'] = width
-        kwargs['height'] = height
+    svg = SVG({ 'viewBox': view_box })
 
-        child = SVGElement('rect', kwargs)
-        self.children.append(child)
+    # Add nodes
+    for (cx, cy) in node_coords:
+        svg.add_circle(cx, cy, node_r, { 'class': 'node' })
 
-        return child
+    # Add edges
+    
 
-    def output(self, nesting=0):
-        indent = ' ' * nesting * self.indent
-
-        svg_string = indent + '<%s' % (self.type)
-
-        for key, value in self.attributes.items():
-            svg_string += ' {0}="{1}}"'.format(key, value)
-
-        if self.children is None:
-            svg_string += '/>'
-        else:
-            svg_string += '>'
-
-            new_line = False
-            for child in self.children:
-                if isinstance(child, SVGElement):
-                    svg_string += '\n{0}'.format(child.output(nesting + 1))
-                    new_line = True
-                else:
-                    svg_string += child
-
-            if new_line:
-                svg_string += '\n{0}</{1}>'.format(indent, self.type)
-            else:
-                svg_string += '</{0}>'.format(self.type)
-
-        return svg_string
+    return svg
