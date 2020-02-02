@@ -1,6 +1,7 @@
 from svg_element import SVG
 from math import pi, cos, sin, atan2, hypot
 
+
 def get_chain_svg(chain, **kwargs):
     # Get config
     border = kwargs.get('border', 10)
@@ -86,6 +87,13 @@ def add_arrows(svg):
 def add_nodes(svg, nodes, node_r):
     for node in nodes:
         svg.add_circle(node.x, node.y, node_r, { 'class': 'node' })
+        if node.label:
+            svg.add('text', {
+                'x': node.x,
+                'y': node.y,
+                'class': 'node-label'
+            },
+            node.label)
 
 
 def add_edges(svg, edges, node_r, dx):
@@ -162,4 +170,3 @@ def add_edges(svg, edges, node_r, dx):
                     'marker-end': "url(#arrow)"
                 }
                 svg.add('line', attributes)
-
