@@ -7,19 +7,18 @@ from errors import MarkovChainPropertyError
 class MarkovChain:
     """A Markov chain, consisting of nodes and edges."""
 
-    def __init__(self, params=None):
+    def __init__(self, nodes=None, edges=None):
         self.nodes = []
         self.edges = []
 
-        if params:
-            if type(params) == int:
-                # params is a number of nodes
-                self.add_nodes(params)
-            else:
-                # params is a list of edges
-                nodes = max(max(edge) for edge in params) + 1
+        if nodes:
+            self.add_nodes(nodes)
+
+        if edges:
+            if not nodes:
+                nodes = max(max(edge) for edge in edges) + 1
                 self.add_nodes(nodes)
-                self.add_edges(params)
+            self.add_edges(edges)
 
     def __str__(self):
         return "A Markov chain with {0} nodes and {1} edges".format(
@@ -31,9 +30,13 @@ class MarkovChain:
         n = len(self.nodes)
         self.nodes.append(Node(n, label))
 
-    def add_nodes(self, n):
-        for _ in range(n):
-            self.add_node()
+    def add_nodes(self, nodes):
+        if type(nodes) == int:
+            for _ in range(nodes):
+                self.add_node()
+        else:
+            for label in nodes:
+                self.add_node(label)
 
     def add_edge(self, index1, index2, probability=1):
         # TODO test index exists
