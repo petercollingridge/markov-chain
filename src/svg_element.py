@@ -72,7 +72,7 @@ class SVGElement:
                     svg_string += '\n{0}'.format(child.output(nesting + 1))
                     new_line = True
                 else:
-                    svg_string += child
+                    svg_string += str(child)
 
             if new_line:
                 svg_string += '\n{0}</{1}>'.format(indent, self.type)
